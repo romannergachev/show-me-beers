@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -18,9 +19,19 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public View mBeerView;
+        public ImageView mBeerImage;
+        public TextView mBeerName;
+        public TextView mBeerBrewery;
+        public TextView mBeerStyle;
+        public TextView mBeerCreationDate;
         public ViewHolder(View v) {
             super(v);
             mBeerView = v;
+            mBeerImage = (ImageView) mBeerView.findViewById(R.id.beer_image);
+            mBeerName = (TextView) mBeerView.findViewById(R.id.beer_name);
+            mBeerBrewery = (TextView) mBeerView.findViewById(R.id.beer_brewery);
+            mBeerStyle = (TextView) mBeerView.findViewById(R.id.beer_style);
+            mBeerCreationDate = (TextView) mBeerView.findViewById(R.id.beer_date);
         }
     }
 
@@ -47,8 +58,10 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        TextView beerText = (TextView) holder.mBeerView.findViewById(R.id.beer_name);
-        beerText.setText(mDataset[position]);
+        holder.mBeerName.setText(mDataset[position]);
+        //holder.mBeerBrewery.setText(mDataset[position]);
+        //holder.mBeerStyle.setText(mDataset[position]);
+
 
     }
 

@@ -7,11 +7,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nergachev.roman.showmebeers.model.Beer;
+import com.nergachev.roman.showmebeers.model.BeersList;
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
 /**
  * Created by rone on 05/02/16.
  */
 public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
-    private String[] mDataset;
+    private List<Beer> mBeersList;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -36,8 +42,8 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public BeerAdapter(String[] myDataset) {
-        mDataset = myDataset;
+    public BeerAdapter(List<Beer> mBeersList) {
+        this.mBeersList = mBeersList;
     }
 
     // Create new views (invoked by the layout manager)
@@ -58,9 +64,14 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.mBeerName.setText(mDataset[position]);
-        //holder.mBeerBrewery.setText(mDataset[position]);
-        //holder.mBeerStyle.setText(mDataset[position]);
+        Beer beer = mBeersList.get(position);
+        holder.mBeerName.setText(beer.getName());
+        holder.mBeerStyle.setText(beer.getStyle());
+        holder.mBeerBrewery.setText(beer.getBrewery());
+        holder.mBeerCreationDate.setText(beer.getCreateDate());
+        Picasso.with(holder.mBeerView.getContext()).load(beer.getLabel()).into(holder.mBeerImage);
+
+        //holder.mBeerImage.set
 
 
     }
@@ -68,6 +79,11 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mDataset.length;
+        if(mBeersList == null){
+            return 0;
+        } else {
+            return mBeersList.size();
+        }
+
     }
 }

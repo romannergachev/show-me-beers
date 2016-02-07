@@ -1,13 +1,17 @@
 package com.nergachev.roman.showmebeers;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
 
-import com.squareup.moshi.Moshi;
+import com.nergachev.roman.showmebeers.httpclient.BreweryDbAPI;
+import com.nergachev.roman.showmebeers.httpclient.RetrofitClient;
+import com.nergachev.roman.showmebeers.model.Beer;
+import com.nergachev.roman.showmebeers.model.BeersList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -19,6 +23,8 @@ public class MainActivity extends Activity implements Callback<BeersList> {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private RetrofitClient retrofitClient;
+    private List<Beer> beersList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +47,8 @@ public class MainActivity extends Activity implements Callback<BeersList> {
             myDataset[j] = "abc  " + i;
             i++;
         }
-        mAdapter = new BeerAdapter(myDataset);
+        beersList = new ArrayList<>();
+        mAdapter = new BeerAdapter(beersList);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -52,24 +59,20 @@ public class MainActivity extends Activity implements Callback<BeersList> {
     }
 
     private void configureBeerAPI(){
-        String apiKey = "920c6d2232172e28c4854416d53fc530";
-        String abv = "-10";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://api.brewerydb.com")
-                .addConverterFactory(MoshiConverterFactory.create())
-                .build();
+        retrofitClient = RetrofitClient.newBuilder().build();
 
-        BreweryDbAPI breweryDbAPI = retrofit.create(BreweryDbAPI.class);
-
-        Call<BeersList> call = breweryDbAPI.listBeers(apiKey, abv);
-        //asynchronous call
+        Call<BeersList> call = retrofitClient.listBeers();
         call.enqueue(this);
     }
 
     @Override
     public void onResponse(Call<BeersList> call, Response<BeersList> response) {
-    int i=0;
-        i++;
+        response.body().loadBreweries(retrofitClient);
+        beersList = response.body().getBeersList();
+        //mRecyclerView.invalidate();
+        mAdapter = new BeerAdapter(beersList);
+        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

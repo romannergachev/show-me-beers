@@ -16,6 +16,7 @@ import retrofit2.Response;
 public class BeerJson implements Callback<BreweriesList> {
     private String id;
     private String name;
+    private String currentPage;
     private BeerImage labels;
     private Brewery brewery;
     private BeerStyle style;
@@ -34,7 +35,7 @@ public class BeerJson implements Callback<BreweriesList> {
 
     public String getLabels() {
         if(labels == null){
-            return "http://pngimg.com/upload/small/beer_PNG2390.png";
+            return null;
         }
         return labels.getIcon();
     }
@@ -43,11 +44,17 @@ public class BeerJson implements Callback<BreweriesList> {
         return id;
     }
 
-    public BeerStyle getStyle() {
-        return style;
+    public String getStyle() {
+        if(style == null){
+            return "Unknown Style" ;
+        }
+        return style.getName();
     }
 
     public String getCreateDate() {
+        if(createDate == null){
+            return "Unknown date";
+        }
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
         DateTime dt = formatter.parseDateTime(createDate);
         return "" + dt.getDayOfMonth() + " " + dt.monthOfYear().getAsText() + " " + dt.year().getAsText();
@@ -77,7 +84,11 @@ public class BeerJson implements Callback<BreweriesList> {
         this.createDate = createDate;
     }
 
-//        public void loadBrewery(RetrofitClient retrofitClient) {
+    public String getCurrentPage() {
+        return currentPage;
+    }
+
+    //        public void loadBrewery(RetrofitClient retrofitClient) {
 //        Call<BreweriesList> call = retrofitClient.listBreweries(this.id);
 //        //call.enqueue(this);
 //    }

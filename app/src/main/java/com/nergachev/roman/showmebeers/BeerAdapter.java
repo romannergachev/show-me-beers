@@ -10,13 +10,23 @@ import android.widget.TextView;
 import com.nergachev.roman.showmebeers.model.Beer;
 import com.squareup.picasso.Picasso;
 
+import java.util.Calendar;
 import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by rone on 05/02/16.
  */
 public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     private List<Beer> mBeersList;
+    private Realm realm;
+    private Integer pageCount;
+
+    public List<Beer> getData() {
+        return mBeersList;
+    }
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -41,8 +51,10 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public BeerAdapter(List<Beer> mBeersList) {
+    public BeerAdapter(List<Beer> mBeersList, Realm realm) {
         this.mBeersList = mBeersList;
+        this.realm = realm;
+        this.pageCount = 1;
     }
 
     // Create new views (invoked by the layout manager)
@@ -68,11 +80,24 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
         holder.mBeerStyle.setText(beer.getStyle());
         holder.mBeerBrewery.setText(beer.getBrewery());
         holder.mBeerCreationDate.setText(beer.getCreateDate());
-        Picasso.with(holder.mBeerView.getContext()).load(beer.getLabel()).into(holder.mBeerImage);
+        if(beer.getLabel() != null){
+            Picasso.with(holder.mBeerView.getContext()).load(beer.getLabel()).into(holder.mBeerImage);
+        }
+
 
         //holder.mBeerImage.set
 
 
+    }
+
+    public void increasePageCount() {
+        this.pageCount++;
+    }
+
+    public void updateDataSet(RealmResults<Beer> beers){
+        this.mBeersList.clear();
+        this.mBeersList.addAll(beers);
+        notifyDataSetChanged();
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -81,7 +106,7 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
         if(mBeersList == null){
             return 0;
         } else {
-            return mBeersList.size();
+            return realm.where(Beer.class).lessThan("page", pageCount).findAll().size();
         }
 
     }

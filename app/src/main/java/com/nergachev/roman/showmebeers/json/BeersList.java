@@ -6,6 +6,7 @@ import java.util.List;
  * Created by rone on 06/02/16.
  */
 public class BeersList{
+    private int currentPage;
     List<BeerJson> data;
 
 //    public void loadBreweries(RetrofitClient retrofitClient){
@@ -16,5 +17,9 @@ public class BeersList{
 
     public List<BeerJson> getBeersList() {
         return data;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
     }
 }

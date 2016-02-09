@@ -20,18 +20,17 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity{
-    private static final String apiKey = "b472a4a7277a9944ae2af0732ebaf395";
+    private static final String apiKey = "920c6d2232172e28c4854416d53fc530";
     private static final String abv = "-10";
 
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private BeerAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private RealmResults<Beer> beersList;
     private Realm realm;
     private BreweryService service;
-    private int currentPage;
-    private Subscriber<BeersList> subscriber;
+    private Integer currentPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +48,10 @@ public class MainActivity extends Activity{
 
         // specify an adapter (see also next example)
         realm = Realm.getInstance(getApplicationContext());
+        currentPage = 1;
 
         beersList = realm.where(Beer.class).findAll();
-        currentPage = 1;
-        mAdapter = new BeerAdapter(beersList);
+        mAdapter = new BeerAdapter(beersList, realm);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -71,57 +70,13 @@ public class MainActivity extends Activity{
                 service.listBeers(apiKey, abv, currentPage)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<BeersList>() {
-                            @Override
-                            public void onCompleted() {
-
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-
-                            @Override
-                            public void onNext(BeersList beersList) {
-                                List<Beer> beerList = BeerParser.parseBeerJsonToBeer(beersList.getBeersList());
-                                realm.beginTransaction();
-                                realm.copyToRealmOrUpdate(beerList);
-                                realm.commitTransaction();
-                                currentPage++;
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
+                        .subscribe(getSubscriber());
 
             }
         });
     }
 
     private void configBeerAPI(){
-        subscriber = new Subscriber<BeersList>() {
-            @Override
-            public void onCompleted() {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onNext(BeersList beersList) {
-                List<Beer> beerList = BeerParser.parseBeerJsonToBeer(beersList.getBeersList());
-                realm.beginTransaction();
-                realm.copyToRealmOrUpdate(beerList);
-                realm.commitTransaction();
-                currentPage++;
-                mAdapter.notifyDataSetChanged();
-            }
-        };
-
-
-
         service = ServiceFactory.createRetrofitService(BreweryService.class, BreweryService.SERVICE_ENDPOINT);
         makeBeerCall();
     }
@@ -130,6 +85,35 @@ public class MainActivity extends Activity{
         service.listBeers(apiKey, abv, currentPage)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(subscriber);
+                .subscribe(getSubscriber());
+    }
+
+    private Subscriber<BeersList> getSubscriber() {
+        Subscriber<BeersList> subscriber = new Subscriber<BeersList>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                currentPage++;
+                mAdapter.increasePageCount();
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onNext(BeersList beers) {
+                List<Beer> beerList = BeerParser.parseBeerJsonToBeer(beers);
+                realm.beginTransaction();
+                realm.copyToRealmOrUpdate(beerList);
+                realm.commitTransaction();
+
+                currentPage++;
+                mAdapter.increasePageCount();
+                mAdapter.notifyDataSetChanged();
+            }
+        };
+        return subscriber;
     }
 }

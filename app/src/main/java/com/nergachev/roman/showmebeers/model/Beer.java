@@ -1,27 +1,34 @@
 package com.nergachev.roman.showmebeers.model;
 
-import com.nergachev.roman.showmebeers.httpclient.RetrofitClient;
+import com.nergachev.roman.showmebeers.json.BeerImage;
+import com.nergachev.roman.showmebeers.json.BeerStyle;
+import com.nergachev.roman.showmebeers.json.Brewery;
 
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by rone on 06/02/16.
  */
-public class Beer implements Callback<BreweriesList> {
-    String id;
-    String name;
-    BeerImage labels;
-    Brewery brewery;
-    BeerStyle style;
-    String createDate;
+public class Beer extends RealmObject {
+    @PrimaryKey
+    private String name;
 
-    @Override
-    public String toString() {
-        return super.toString();
+    private String label;
+    private String brewery;
+    private String style;
+    private String createDate;
+
+    public Beer(){
+
+    }
+
+    public Beer(String name, String label, String brewery, String style, String createDate){
+        this.name = name;
+        this.label = label;
+        this.brewery = brewery;
+        this.style = style;
+        this.createDate = createDate;
     }
 
     public String getName() {
@@ -29,47 +36,38 @@ public class Beer implements Callback<BreweriesList> {
     }
 
     public String getBrewery() {
-        if(brewery == null){
-            return "no data";
-        }
-        return brewery.getName();
+        return brewery;
     }
 
     public String getLabel() {
-        if(labels == null){
-            return "http://pngimg.com/upload/small/beer_PNG2390.png";
-        }
-        return labels.getIcon();
+        return label;
     }
 
     public String getStyle() {
-        return style.name;
+        return style;
     }
 
     public String getCreateDate() {
         return createDate;
     }
 
-    public void loadBrewery(RetrofitClient retrofitClient) {
-        Call<BreweriesList> call = retrofitClient.listBreweries(this.id);
-        //call.enqueue(this);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    public void onResponse(Call<BreweriesList> call, Response<BreweriesList> response) {
-        List<Brewery> breweries = response.body().data;
-        if(breweries != null && !breweries.isEmpty()){
-            this.brewery = breweries.get(0);
-        } else {
-            this.brewery = new Brewery();
-            this.brewery.setName("No Brewery found");
-            this.brewery.setId("-1");
-        }
-
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    @Override
-    public void onFailure(Call<BreweriesList> call, Throwable t) {
+    public void setBrewery(String brewery) {
+        this.brewery = brewery;
+    }
 
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 }

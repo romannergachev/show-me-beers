@@ -1,11 +1,13 @@
-package com.nergachev.roman.showmebeers.model;
+package com.nergachev.roman.showmebeers.json;
+
+import io.realm.RealmObject;
 
 /**
  * Created by rone on 06/02/16.
  */
-public class Brewery {
-    String id;
-    String name;
+public class Brewery{
+    private String id;
+    private String name;
 
     public String getId() {
         return id;

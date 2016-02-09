@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nergachev.roman.showmebeers.model.Beer;
-import com.nergachev.roman.showmebeers.model.BeersList;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

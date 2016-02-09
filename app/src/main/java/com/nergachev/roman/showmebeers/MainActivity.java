@@ -5,26 +5,33 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.nergachev.roman.showmebeers.httpclient.BreweryDbAPI;
-import com.nergachev.roman.showmebeers.httpclient.RetrofitClient;
+import com.nergachev.roman.showmebeers.service.BreweryService;
+import com.nergachev.roman.showmebeers.service.ServiceFactory;
 import com.nergachev.roman.showmebeers.model.Beer;
-import com.nergachev.roman.showmebeers.model.BeersList;
+import com.nergachev.roman.showmebeers.json.BeersList;
+import com.nergachev.roman.showmebeers.model.parser.BeerParser;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.MoshiConverterFactory;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-public class MainActivity extends Activity implements Callback<BeersList> {
+public class MainActivity extends Activity{
+    private static final String apiKey = "b472a4a7277a9944ae2af0732ebaf395";
+    private static final String abv = "-10";
+
+
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private RetrofitClient retrofitClient;
-    private List<Beer> beersList;
+    private LinearLayoutManager mLayoutManager;
+    private RealmResults<Beer> beersList;
+    private Realm realm;
+    private BreweryService service;
+    private int currentPage;
+    private Subscriber<BeersList> subscriber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +48,10 @@ public class MainActivity extends Activity implements Callback<BeersList> {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        int i = 0;
-        String[] myDataset = new String[150];
-        for (int j = 0;j<myDataset.length;j++){
-            myDataset[j] = "abc  " + i;
-            i++;
-        }
-        beersList = new ArrayList<>();
+        realm = Realm.getInstance(getApplicationContext());
+
+        beersList = realm.where(Beer.class).findAll();
+        currentPage = 1;
         mAdapter = new BeerAdapter(beersList);
         mRecyclerView.setAdapter(mAdapter);
     }
@@ -55,28 +59,77 @@ public class MainActivity extends Activity implements Callback<BeersList> {
     @Override
     protected void onStart() {
         super.onStart();
-        configureBeerAPI();
-    }
-
-    private void configureBeerAPI(){
-        retrofitClient = RetrofitClient.newBuilder().build();
-
-        Call<BeersList> call = retrofitClient.listBeers();
-        call.enqueue(this);
+        configBeerAPI();
     }
 
     @Override
-    public void onResponse(Call<BeersList> call, Response<BeersList> response) {
-        response.body().loadBreweries(retrofitClient);
-        beersList = response.body().getBeersList();
-        //mRecyclerView.invalidate();
-        mAdapter = new BeerAdapter(beersList);
-        mRecyclerView.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
+    protected void onResume() {
+        super.onResume();
+        mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager) {
+            @Override
+            public void onLoadMore(int current_page) {
+                service.listBeers(apiKey, abv, currentPage)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<BeersList>() {
+                            @Override
+                            public void onCompleted() {
+
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onNext(BeersList beersList) {
+                                List<Beer> beerList = BeerParser.parseBeerJsonToBeer(beersList.getBeersList());
+                                realm.beginTransaction();
+                                realm.copyToRealmOrUpdate(beerList);
+                                realm.commitTransaction();
+                                currentPage++;
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+            }
+        });
     }
 
-    @Override
-    public void onFailure(Call<BeersList> call, Throwable t) {
+    private void configBeerAPI(){
+        subscriber = new Subscriber<BeersList>() {
+            @Override
+            public void onCompleted() {
 
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(BeersList beersList) {
+                List<Beer> beerList = BeerParser.parseBeerJsonToBeer(beersList.getBeersList());
+                realm.beginTransaction();
+                realm.copyToRealmOrUpdate(beerList);
+                realm.commitTransaction();
+                currentPage++;
+                mAdapter.notifyDataSetChanged();
+            }
+        };
+
+
+
+        service = ServiceFactory.createRetrofitService(BreweryService.class, BreweryService.SERVICE_ENDPOINT);
+        makeBeerCall();
+    }
+
+    private void makeBeerCall(){
+        service.listBeers(apiKey, abv, currentPage)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
     }
 }

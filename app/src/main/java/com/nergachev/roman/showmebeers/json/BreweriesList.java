@@ -1,10 +1,10 @@
-package com.nergachev.roman.showmebeers.model;
+package com.nergachev.roman.showmebeers.json;
 
 import java.util.List;
 
 /**
  * Created by rone on 06/02/16.
  */
-public class BreweriesList {
+public class BreweriesList{
     List<Brewery> data;
 }

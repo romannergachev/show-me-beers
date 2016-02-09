@@ -1,6 +1,9 @@
 package com.nergachev.roman.showmebeers;
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +23,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity{
-    private static final String apiKey = "920c6d2232172e28c4854416d53fc530";
+    private static final String apiKey = "e336e24da1f407346460595d9a7144d0";
     private static final String abv = "-10";
 
 
@@ -31,6 +34,7 @@ public class MainActivity extends Activity{
     private Realm realm;
     private BreweryService service;
     private Integer currentPage;
+    private ConnectivityManager connectivityManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,8 @@ public class MainActivity extends Activity{
         // specify an adapter (see also next example)
         realm = Realm.getInstance(getApplicationContext());
         currentPage = 1;
+        connectivityManager = (ConnectivityManager)getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         beersList = realm.where(Beer.class).findAll();
         mAdapter = new BeerAdapter(beersList, realm);
@@ -58,7 +64,8 @@ public class MainActivity extends Activity{
     @Override
     protected void onStart() {
         super.onStart();
-        configBeerAPI();
+        service = ServiceFactory.createRetrofitService(BreweryService.class, BreweryService.SERVICE_ENDPOINT);
+        makeBeerCall();
     }
 
     @Override
@@ -67,25 +74,31 @@ public class MainActivity extends Activity{
         mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager) {
             @Override
             public void onLoadMore(int current_page) {
-                service.listBeers(apiKey, abv, currentPage)
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(getSubscriber());
-
+                makeBeerCall();
             }
         });
     }
 
-    private void configBeerAPI(){
-        service = ServiceFactory.createRetrofitService(BreweryService.class, BreweryService.SERVICE_ENDPOINT);
-        makeBeerCall();
+    private void makeBeerCall(){
+        if(checkNetworkState()){
+            service.listBeers(apiKey, abv, currentPage)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(getSubscriber());
+        } else {
+            currentPage++;
+            mAdapter.increasePageCount();
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
-    private void makeBeerCall(){
-        service.listBeers(apiKey, abv, currentPage)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(getSubscriber());
+    private boolean checkNetworkState(){
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if(activeNetwork == null){
+            return false;
+        }
+        boolean isConnected = activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
     private Subscriber<BeersList> getSubscriber() {

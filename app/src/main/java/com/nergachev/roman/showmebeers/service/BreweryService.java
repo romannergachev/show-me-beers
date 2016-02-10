@@ -18,7 +18,6 @@ public interface BreweryService {
 
     @GET("/v2/beers")
     Observable<BeersList> listBeers(@Query("key") String apiKey, @Query("abv") String abv, @Query("p") int page);
-    //Call<BeersList> listBeers(@Query("key") String apiKey, @Query("abv") String abv, @Query("p") int page);
 
     @GET("/v2/beer/{id}/breweries")
     Call<BreweriesList> listBreweries(@Path("id") String beerId, @Query("key") String apiKey);

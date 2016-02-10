@@ -1,4 +1,4 @@
-package com.nergachev.roman.showmebeers;
+package com.nergachev.roman.showmebeers.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nergachev.roman.showmebeers.R;
 import com.nergachev.roman.showmebeers.model.Beer;
 import com.squareup.picasso.Picasso;
 
-import java.util.Calendar;
 import java.util.List;
 
 import io.realm.Realm;
@@ -51,8 +51,8 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public BeerAdapter(List<Beer> mBeersList, Realm realm) {
-        this.mBeersList = mBeersList;
+    public BeerAdapter(Realm realm) {
+        this.mBeersList = realm.where(Beer.class).findAll();
         this.realm = realm;
         this.pageCount = 1;
     }
@@ -109,5 +109,9 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
             return realm.where(Beer.class).lessThan("page", pageCount).findAll().size();
         }
 
+    }
+
+    public Integer getPageCount() {
+        return pageCount;
     }
 }

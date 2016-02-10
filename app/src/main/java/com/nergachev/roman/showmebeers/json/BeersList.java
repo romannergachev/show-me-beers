@@ -1,5 +1,10 @@
 package com.nergachev.roman.showmebeers.json;
 
+import android.util.Log;
+
+import com.nergachev.roman.showmebeers.service.BreweryService;
+
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -9,11 +14,15 @@ public class BeersList{
     private int currentPage;
     List<BeerJson> data;
 
-//    public void loadBreweries(RetrofitClient retrofitClient){
-////        for (Beer item: data) {
-////            item.loadBrewery(retrofitClient);
-////        }
-//    }
+    public void loadBreweries(BreweryService service, String key){
+        for (BeerJson item: data) {
+            try {
+                item.loadBrewery(service, key);
+            } catch (IOException e) {
+                Log.d("LOADING_BREWERIES", "loading failed!");
+            }
+        }
+    }
 
     public List<BeerJson> getBeersList() {
         return data;

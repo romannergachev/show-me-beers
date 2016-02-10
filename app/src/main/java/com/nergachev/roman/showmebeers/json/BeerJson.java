@@ -1,11 +1,16 @@
 package com.nergachev.roman.showmebeers.json;
 
+import com.nergachev.roman.showmebeers.model.Beer;
+import com.nergachev.roman.showmebeers.service.BreweryService;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.IOException;
 import java.util.List;
 
+import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -13,7 +18,7 @@ import retrofit2.Response;
 /**
  * Created by rone on 06/02/16.
  */
-public class BeerJson implements Callback<BreweriesList> {
+public class BeerJson{
     private String id;
     private String name;
     private String currentPage;
@@ -68,46 +73,25 @@ public class BeerJson implements Callback<BreweriesList> {
         this.name = name;
     }
 
-    public void setLabels(BeerImage labels) {
-        this.labels = labels;
-    }
-
-    public void setBrewery(Brewery brewery) {
-        this.brewery = brewery;
-    }
-
     public void setStyle(BeerStyle style) {
         this.style = style;
     }
 
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
-    }
-
-    public String getCurrentPage() {
-        return currentPage;
-    }
-
-    //        public void loadBrewery(RetrofitClient retrofitClient) {
-//        Call<BreweriesList> call = retrofitClient.listBreweries(this.id);
-//        //call.enqueue(this);
-//    }
-
-    @Override
-    public void onResponse(Call<BreweriesList> call, Response<BreweriesList> response) {
-        List<Brewery> breweries = response.body().data;
-        if(breweries != null && !breweries.isEmpty()){
-            this.brewery = breweries.get(0);
-        } else {
-            this.brewery = new Brewery();
-            this.brewery.setName("No Brewery found");
-            this.brewery.setId("-1");
-        }
-
-    }
-
-    @Override
-    public void onFailure(Call<BreweriesList> call, Throwable t) {
-
+    public void loadBrewery(BreweryService service, String key) throws IOException {
+//        final Call<BreweriesList> call = service.listBreweries(this.id, key);
+//                try {
+//                    Response<BreweriesList> response = call.execute();
+//                    List<Brewery> breweries = response.body().data;
+//
+//                    if(breweries != null && !breweries.isEmpty()){
+//                        brewery = breweries.get(0);
+//                    } else {
+//                        brewery = new Brewery();
+//                        brewery.setName("No Brewery found");
+//                        brewery.setId("-1");
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
     }
 }

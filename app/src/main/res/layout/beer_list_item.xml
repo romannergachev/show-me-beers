@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="#d7ccc8">
 
     <TextView
         android:layout_width="wrap_content"
@@ -46,7 +47,8 @@
         android:layout_alignBottom="@+id/beer_image"
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/beer_image"
-        android:layout_below="@+id/beer_brewery" />
+        android:layout_below="@+id/beer_brewery"
+        android:gravity="center_vertical" />
 
     <TextView
         android:layout_width="wrap_content"

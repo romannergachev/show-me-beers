@@ -1,10 +1,9 @@
 package com.nergachev.roman.showmebeers.service;
 
-import com.nergachev.roman.showmebeers.json.BeersList;
-import com.nergachev.roman.showmebeers.json.BreweriesList;
+import com.nergachev.roman.showmebeers.model.json.BeersList;
+import com.nergachev.roman.showmebeers.model.json.BreweriesList;
 
 
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;

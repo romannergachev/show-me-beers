@@ -1,9 +1,5 @@
 package com.nergachev.roman.showmebeers.model;
 
-import com.nergachev.roman.showmebeers.json.BeerImage;
-import com.nergachev.roman.showmebeers.json.BeerStyle;
-import com.nergachev.roman.showmebeers.json.Brewery;
-
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -21,12 +17,12 @@ public class Beer extends RealmObject {
     private String createDate;
     private int page;
 
-    public Beer(){
+    public Beer() {
 
     }
 
     public Beer(String id, String name, String label, String brewery, String style
-            , String createDate, int page){
+            , String createDate, int page) {
         this.id = id;
         this.name = name;
         this.label = label;

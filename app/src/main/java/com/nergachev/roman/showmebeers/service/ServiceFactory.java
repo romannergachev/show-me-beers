@@ -11,8 +11,9 @@ public class ServiceFactory {
 
     /**
      * Creates a retrofit service from an arbitrary class (clazz)
-     * @param clazz Java interface of the retrofit service
-     * @param baseUrl REST endpoint url
+     *
+     * @param clazz   Java interface of the retrofit service
+     * @param baseUrl REST baseUrl url
      * @return retrofit service with defined endpoint
      */
     public static <T> T createRetrofitService(final Class<T> clazz, final String baseUrl) {

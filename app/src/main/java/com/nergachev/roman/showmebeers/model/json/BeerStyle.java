@@ -1,11 +1,9 @@
-package com.nergachev.roman.showmebeers.json;
-
-import io.realm.RealmObject;
+package com.nergachev.roman.showmebeers.model.json;
 
 /**
  * Created by rone on 06/02/16.
  */
-public class BeerStyle{
+public class BeerStyle {
     private String name;
 
     public String getName() {

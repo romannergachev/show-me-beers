@@ -15,7 +15,7 @@ public class BeerParser {
 
         List<Beer> beersList = new ArrayList<>();
         for (BeerJson beerJson: beers.getBeersList()) {
-            Beer beer = new Beer(beerJson.getName(), beerJson.getLabels(), beerJson.getBrewery(),
+            Beer beer = new Beer(beerJson.getId(), beerJson.getName(), beerJson.getLabels(), beerJson.getBrewery(),
                     beerJson.getStyle(), beerJson.getCreateDate(), beers.getCurrentPage());
             beersList.add(beer);
         }

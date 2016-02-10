@@ -7,4 +7,8 @@ import java.util.List;
  */
 public class BreweriesList{
     List<Brewery> data;
+
+    public List<Brewery> getData() {
+        return data;
+    }
 }

@@ -78,14 +78,13 @@ public class BeerAdapter extends RecyclerView.Adapter<BeerAdapter.ViewHolder> {
         Beer beer = mBeersList.get(position);
         holder.mBeerName.setText(beer.getName());
         holder.mBeerStyle.setText(beer.getStyle());
-        holder.mBeerBrewery.setText(beer.getBrewery());
+        if(beer.getBrewery() != null){
+            holder.mBeerBrewery.setText(beer.getBrewery());
+        }
         holder.mBeerCreationDate.setText(beer.getCreateDate());
         if(beer.getLabel() != null){
             Picasso.with(holder.mBeerView.getContext()).load(beer.getLabel()).into(holder.mBeerImage);
         }
-
-
-        //holder.mBeerImage.set
 
 
     }

@@ -14,6 +14,7 @@ public class Beer extends RealmObject {
     @PrimaryKey
     private String name;
 
+    private String id;
     private String label;
     private String brewery;
     private String style;
@@ -24,7 +25,9 @@ public class Beer extends RealmObject {
 
     }
 
-    public Beer(String name, String label, String brewery, String style, String createDate, int page){
+    public Beer(String id, String name, String label, String brewery, String style
+            , String createDate, int page){
+        this.id = id;
         this.name = name;
         this.label = label;
         this.brewery = brewery;
@@ -57,6 +60,10 @@ public class Beer extends RealmObject {
         return page;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -79,5 +86,9 @@ public class Beer extends RealmObject {
 
     public void setPage(int page) {
         this.page = page;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

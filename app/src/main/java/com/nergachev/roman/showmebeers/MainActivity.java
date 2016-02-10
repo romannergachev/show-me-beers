@@ -7,9 +7,11 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.nergachev.roman.showmebeers.adapter.BeerAdapter;
 import com.nergachev.roman.showmebeers.adapter.decoration.DividerItemDecoration;
+import com.nergachev.roman.showmebeers.json.BreweriesList;
 import com.nergachev.roman.showmebeers.service.BreweryService;
 import com.nergachev.roman.showmebeers.service.ServiceFactory;
 import com.nergachev.roman.showmebeers.model.Beer;
@@ -26,7 +28,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity{
-    private static final String apiKey = "e336e24da1f407346460595d9a7144d0";
+    private static final String apiKey = "1455fc3ce46786a1a2e1c7996e8985c3";
     private static final String abv = "-10";
 
 
@@ -37,6 +39,8 @@ public class MainActivity extends Activity{
     private BreweryService service;
     private ConnectivityManager connectivityManager;
     private SwipyRefreshLayout mSwipyRefreshLayout;
+    private List<Beer> downloadedBeersList;
+    private volatile int counter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +88,7 @@ public class MainActivity extends Activity{
                     .subscribe(getSubscriber());
         } else {
             mSwipyRefreshLayout.setRefreshing(false);
-            if(realm.where(Beer.class).equalTo("page", mAdapter.getPageCount() + 1).findAll().size() > 0) {
+            if(realm.where(Beer.class).equalTo("page", mAdapter.getPageCount()).findAll().size() > 0) {
                 mAdapter.increasePageCount();
                 mAdapter.notifyDataSetChanged();
             }
@@ -112,18 +116,79 @@ public class MainActivity extends Activity{
                 mSwipyRefreshLayout.setRefreshing(false);
                 mAdapter.increasePageCount();
                 mAdapter.notifyDataSetChanged();
+                Log.d("NETWORKING", e.getMessage());
             }
 
             @Override
             public void onNext(BeersList beers) {
                 mSwipyRefreshLayout.setRefreshing(false);
-                beers.loadBreweries(service, apiKey);
-                List<Beer> beerList = BeerParser.parseBeerJsonToBeer(beers);
+                //beers.loadBreweries(service, apiKey);
+                downloadedBeersList = BeerParser.parseBeerJsonToBeer(beers);
                 realm.beginTransaction();
-                realm.copyToRealmOrUpdate(beerList);
+                realm.copyToRealmOrUpdate(downloadedBeersList);
                 realm.commitTransaction();
                 mAdapter.increasePageCount();
                 mAdapter.notifyDataSetChanged();
+
+                counter = beers.getIds().size();
+                for (int i = 0; i < beers.getIds().size(); i++) {
+                    String id = beers.getIds().get(i);
+                    service.listBreweries(id, apiKey)
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(getBreweriesSubscriber(id));
+                }
+            }
+        };
+        return subscriber;
+    }
+
+    private Subscriber<BreweriesList> getBreweriesSubscriber(final String id) {
+        Subscriber<BreweriesList> subscriber = new Subscriber<BreweriesList>() {
+            @Override
+            public void onCompleted() {
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                mSwipyRefreshLayout.setRefreshing(false);
+                mAdapter.notifyDataSetChanged();
+                Log.d("NETWORKING", e.getMessage());
+            }
+
+            @Override
+            public void onNext(final BreweriesList breweriesList) {
+                counter--;
+                if(breweriesList != null && breweriesList.getData() != null
+                        && breweriesList.getData().size() > 0){
+                    for (Beer beer:downloadedBeersList){
+                        if(beer.getId().equals(id)){
+                            beer.setBrewery(breweriesList.getData().get(0).getName());
+                            //mAdapter.notifyDataSetChanged();
+                            realm.beginTransaction();
+                            realm.copyToRealmOrUpdate(beer);
+                            realm.commitTransaction();
+                            break;
+                        }
+                    }
+//                    if(counter == 0){
+//                        realm.beginTransaction();
+//                        realm.copyToRealmOrUpdate(downloadedBeersList);
+//                        realm.commitTransaction();
+//                    }
+
+//
+//
+//
+//
+//                    Beer beer = realm.where(Beer.class).equalTo("id", id).findFirst();
+//                    if(beer != null){
+//                        beer.setBrewery(breweriesList.getData().get(0).getName());
+//                        realm.beginTransaction();
+//                        realm.copyToRealmOrUpdate(beer);
+//                        realm.commitTransaction();
+//                    }
+                }
             }
         };
         return subscriber;

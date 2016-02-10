@@ -18,12 +18,12 @@ import retrofit2.Response;
 /**
  * Created by rone on 06/02/16.
  */
-public class BeerJson{
+public class BeerJson implements Callback<BreweriesList>{
     private String id;
     private String name;
     private String currentPage;
     private BeerImage labels;
-    private Brewery brewery;
+    private String brewery;
     private BeerStyle style;
     private String createDate;
 
@@ -32,10 +32,7 @@ public class BeerJson{
     }
 
     public String getBrewery() {
-        if(brewery == null){
-            return "none";
-        }
-        return brewery.getName();
+        return brewery;
     }
 
     public String getLabels() {
@@ -77,21 +74,39 @@ public class BeerJson{
         this.style = style;
     }
 
-    public void loadBrewery(BreweryService service, String key) throws IOException {
+//    public void loadBrewery(BreweryService service, String key) throws IOException {
 //        final Call<BreweriesList> call = service.listBreweries(this.id, key);
-//                try {
-//                    Response<BreweriesList> response = call.execute();
-//                    List<Brewery> breweries = response.body().data;
-//
-//                    if(breweries != null && !breweries.isEmpty()){
-//                        brewery = breweries.get(0);
-//                    } else {
-//                        brewery = new Brewery();
-//                        brewery.setName("No Brewery found");
-//                        brewery.setId("-1");
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
+//        call.enqueue(this);
+////                try {
+////                    Response<BreweriesList> response = call.execute();
+////                    List<Brewery> breweries = response.body().data;
+////
+////                    if(breweries != null && !breweries.isEmpty()){
+////                        brewery = breweries.get(0);
+////                    } else {
+////                        brewery = new Brewery();
+////                        brewery.setName("No Brewery found");
+////                        brewery.setId("-1");
+////                    }
+////                } catch (Exception e) {
+////                    e.printStackTrace();
+////                }
+//    }
+
+
+    public void setBrewery(String brewery) {
+        this.brewery = brewery;
+    }
+
+    @Override
+    public void onResponse(Call<BreweriesList> call, Response<BreweriesList> response) {
+        int i = 0;
+        i++;
+        response.raw().request().url().pathSegments().get(2);
+    }
+
+    @Override
+    public void onFailure(Call<BreweriesList> call, Throwable t) {
+
     }
 }
